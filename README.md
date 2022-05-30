@@ -41,10 +41,25 @@ Clickhouse example:
 
 sql for clickhouse
 ```sql
+-- single server
+CREATE DATABASE prometheus;
+DROP TABLE IF EXISTS prometheus.metrics;
+CREATE TABLE IF NOT EXISTS prometheus.metrics
+(
+     date Date DEFAULT toDate(0),
+     name String,
+     tags Array(String),
+     val Float64,
+     ts DateTime,
+     updated DateTime DEFAULT now()
+)
+ENGINE = GraphiteMergeTree(
+     date, (name, tags, ts), 8192, 'graphite_rollup'
+);
+
+-- for cluster
 -- note: replace {shard} and {replica} and run on each server
-
 CREATE DATABASE prometheus ON CLUSTER '{cluster}';
-
 DROP TABLE IF EXISTS prometheus.metrics;
 CREATE TABLE IF NOT EXISTS prometheus.metrics ON CLUSTER '{cluster}'
 (
